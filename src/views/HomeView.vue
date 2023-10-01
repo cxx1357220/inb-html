@@ -11,6 +11,17 @@
         <el-button size="mini" plain
           :icon="key == 'visits' ? (sortT == 1 ? 'el-icon-caret-bottom' : 'el-icon-caret-top') : ''"
           :type="key == 'visits' ? 'primary' : ''" @click="sort('visits')">visits</el-button>
+        <el-button size="mini" plain
+          :icon="key == 'allSize' ? (sortT == 1 ? 'el-icon-caret-bottom' : 'el-icon-caret-top') : ''"
+          :type="key == 'allSize' ? 'primary' : ''" @click="sort('allSize')">size</el-button>
+        <el-button size="mini" plain
+          :icon="key == 'title' ? (sortT == 1 ? 'el-icon-caret-bottom' : 'el-icon-caret-top') : ''"
+          :type="key == 'title' ? 'primary' : ''" @click="sort('title')">title</el-button>
+        <el-button size="mini" plain
+          :icon="key == 'videoDuration' ? (sortT == 1 ? 'el-icon-caret-bottom' : 'el-icon-caret-top') : ''"
+          :type="key == 'videoDuration' ? 'primary' : ''" @click="sort('videoDuration')">duration</el-button>
+      </div>
+      <div class="button-list">
         <el-button size="mini" plain :type="type == 'video' ? 'primary' : ''"
           @click="changeType('video')">video</el-button>
         <el-button size="mini" plain :type="type == 'other' ? 'primary' : ''"
@@ -25,11 +36,17 @@
 
     </div>
     <div class="home-list">
-      <div v-for="obj in showList">
+      <div v-for="obj in showList" :key="obj.jsonPath">
         <div class="img-box" @click="open(obj)">
           <img v-lazy="obj.newimg" alt="" />
-          <el-button v-if="obj.visits" type="text" icon="el-icon-view" disabled> {{ obj.visits }}</el-button>
-
+          <div class="visits" v-if="obj.visits">
+            <i class="el-icon-view"></i>
+            <span>{{ obj.visits }}</span>
+          </div>
+          <div class="video-duration" v-if="obj.videoDuration">
+            <i class="el-icon-time"></i>
+            <span v-time="obj.videoDuration"></span>
+          </div>
         </div>
         <div class="stars">
           <b v-for="idx in [0, 1, 2, 3, 4]" @click="changeStar(idx, obj)"
@@ -71,6 +88,31 @@ export default {
       update(el, binding) {
         try {
           el.innerHTML = new Date(binding.value).toISOString().split('T')[0];
+        } catch (error) {
+          console.log(binding.value);
+        }
+      },
+    }, time: {
+      bind(el, binding) {
+        try {
+          let result = parseInt(binding.value)
+          let h = Math.floor(result / 3600) < 10 ? '0' + Math.floor(result / 3600) : Math.floor(result / 3600)
+          let m = Math.floor((result / 60 % 60)) < 10 ? '0' + Math.floor((result / 60 % 60)) : Math.floor((result / 60 % 60))
+          let s = Math.floor((result % 60)) < 10 ? '0' + Math.floor((result % 60)) : Math.floor((result % 60))
+          result = `${h}:${m}:${s}`
+          el.innerHTML = result
+        } catch (error) {
+          console.log(binding.value);
+        }
+      },
+      update(el, binding) {
+        try {
+          let result = parseInt(binding.value)
+          let h = Math.floor(result / 3600) < 10 ? '0' + Math.floor(result / 3600) : Math.floor(result / 3600)
+          let m = Math.floor((result / 60 % 60)) < 10 ? '0' + Math.floor((result / 60 % 60)) : Math.floor((result / 60 % 60))
+          let s = Math.floor((result % 60)) < 10 ? '0' + Math.floor((result % 60)) : Math.floor((result % 60))
+          result = `${h}:${m}:${s}`
+          el.innerHTML = result
         } catch (error) {
           console.log(binding.value);
         }
@@ -168,10 +210,23 @@ export default {
           this.key = key
         }
       }
-      this.showList = this.showList.sort((a, b) => { return ((b[this.key] || 0) - (a[this.key] || 0)) * this.sortT })
+
+      if (this.key == 'title' || this.key == 'file') {
+        this.showList.sort((a, b) => {
+          if ((b[this.key] || '').toUpperCase() > (a[this.key] || '').toUpperCase()
+          ) {
+            return this.sortT
+          } else {
+            return this.sortT * -1
+          }
+        })
+      } else {
+        this.showList.sort((a, b) => { return ((b[this.key] || 0) - (a[this.key] || 0)) * this.sortT })
+      }
+      document.body.scrollTop = document.documentElement.scrollTop = 1
       document.body.scrollTop = document.documentElement.scrollTop = 0
     },
-    async changeStar(i, obj) {
+    changeStar(i, obj) {
       obj.star = i + 1;
       for (let i = 0; i < this.list.length; i++) {
         if (this.list[i].filePath == obj.filePath) {
@@ -180,7 +235,7 @@ export default {
         }
       }
       sessionStorage.setItem('list', JSON.stringify(this.list))
-      await axios.post('/api/changeStar', obj).then((item) => {
+      axios.post('/api/changeStar', obj).then((item) => {
         console.log('item: ', item);
       }).catch((err) => {
         console.log('err: ', err);
@@ -272,21 +327,32 @@ export default {
       padding-top: 100%;
       width: 100%;
       background-color: beige;
-
-      &>.el-button {
+      & .visits,.video-duration {
         padding: 0;
         font-size: 10px;
-        z-index: 9;
+        z-index: 10;
         position: absolute;
-        bottom: 5px;
-        left: 5px;
+        bottom: 3px;
+        left: 3px;
+        // background: rgba(0, 0, 0, .5);
+        text-shadow: 1px 1px 0px black;
+        color: white;
+        i {
+          padding: 0;
+        }
 
-        // color: #606266;
         span {
           margin: 0;
-          // color: #606266;
+          color: white;
           font-weight: 100;
         }
+      }
+
+      &>.video-duration {
+        // position: absolute;
+        // bottom: 3px;
+        right: 3px;
+        left: unset;
       }
     }
 
@@ -361,5 +427,4 @@ export default {
   .home-list>div {
     width: calc(100%/3);
   }
-}
-</style>
+}</style>
