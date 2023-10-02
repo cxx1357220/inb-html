@@ -1,16 +1,33 @@
 const fs = require('fs')
-fs.cp('./dist', '../inb-viewer/shareHtml', {
+fs.rm('../inb-viewer/shareHtml', {
     recursive: true
 }, (err) => {
     if (err) {
-        console.error(err);
+        console.log('err: ', err);
+    } else {
+        fs.cp('./dist', '../inb-viewer/shareHtml', {
+            recursive: true
+        }, (err) => {
+            if (err) {
+                console.error(err);
+            }
+        });
     }
-});
+})
 
-fs.cp('./dist', '../inb-raspberry/dist', {
+
+fs.rm('../inb-raspberry/dist', {
     recursive: true
 }, (err) => {
     if (err) {
-        console.error(err);
+        console.log('err: ', err);
+    } else {
+        fs.cp('./dist', '../inb-raspberry/dist', {
+            recursive: true
+        }, (err) => {
+            if (err) {
+                console.error(err);
+            }
+        });
     }
-});
+})

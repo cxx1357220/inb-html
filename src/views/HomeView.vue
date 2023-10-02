@@ -4,29 +4,27 @@
       <div class="button-list">
         <el-button size="mini" plain
           :icon="key == 'date' ? (sortT == 1 ? 'el-icon-caret-bottom' : 'el-icon-caret-top') : ''"
-          :type="key == 'date' ? 'primary' : ''" @click="sort('date')">date</el-button>
+          :type="key == 'date' ? 'primary' : ''" @click="sort('date')">日期</el-button>
         <el-button size="mini" plain
           :icon="key == 'star' ? (sortT == 1 ? 'el-icon-caret-bottom' : 'el-icon-caret-top') : ''"
-          :type="key == 'star' ? 'primary' : ''" @click="sort('star')">star</el-button>
+          :type="key == 'star' ? 'primary' : ''" @click="sort('star')">星级</el-button>
         <el-button size="mini" plain
           :icon="key == 'visits' ? (sortT == 1 ? 'el-icon-caret-bottom' : 'el-icon-caret-top') : ''"
-          :type="key == 'visits' ? 'primary' : ''" @click="sort('visits')">visits</el-button>
+          :type="key == 'visits' ? 'primary' : ''" @click="sort('visits')">阅量</el-button>
         <el-button size="mini" plain
           :icon="key == 'allSize' ? (sortT == 1 ? 'el-icon-caret-bottom' : 'el-icon-caret-top') : ''"
-          :type="key == 'allSize' ? 'primary' : ''" @click="sort('allSize')">size</el-button>
+          :type="key == 'allSize' ? 'primary' : ''" @click="sort('allSize')">大小</el-button>
         <el-button size="mini" plain
           :icon="key == 'title' ? (sortT == 1 ? 'el-icon-caret-bottom' : 'el-icon-caret-top') : ''"
-          :type="key == 'title' ? 'primary' : ''" @click="sort('title')">title</el-button>
+          :type="key == 'title' ? 'primary' : ''" @click="sort('title')">标题</el-button>
         <el-button size="mini" plain
           :icon="key == 'videoDuration' ? (sortT == 1 ? 'el-icon-caret-bottom' : 'el-icon-caret-top') : ''"
-          :type="key == 'videoDuration' ? 'primary' : ''" @click="sort('videoDuration')">duration</el-button>
+          :type="key == 'videoDuration' ? 'primary' : ''" @click="sort('videoDuration')">时长</el-button>
       </div>
       <div class="button-list">
-        <el-button size="mini" plain :type="type == 'video' ? 'primary' : ''"
-          @click="changeType('video')">video</el-button>
-        <el-button size="mini" plain :type="type == 'other' ? 'primary' : ''"
-          @click="changeType('other')">other</el-button>
-        <el-button size="mini" plain :type="type == 'all' ? 'primary' : ''" @click="changeType('all')">all</el-button>
+        <el-button size="mini" plain :type="type == 'video' ? 'primary' : ''" @click="changeType('video')">视频</el-button>
+        <el-button size="mini" plain :type="type == 'other' ? 'primary' : ''" @click="changeType('other')">其他</el-button>
+        <el-button size="mini" plain :type="type == 'all' ? 'primary' : ''" @click="changeType('all')">全部</el-button>
       </div>
       <!-- search:<input type="text" v-model="filterVal">{{ showList.length }} -->
       <el-input type="text" prefix-icon="el-icon-search" :suffix="showList.length" size="mini" placeholder="search"
@@ -47,13 +45,15 @@
             <i class="el-icon-time"></i>
             <span v-time="obj.videoDuration"></span>
           </div>
+          <i :class="['type-icon', obj.type == 'video' ? 'el-icon-video-play' : 'el-icon-document']"></i>
+
         </div>
         <div class="stars">
           <b v-for="idx in [0, 1, 2, 3, 4]" @click="changeStar(idx, obj)"
             :style="{ 'background-color': idx < obj.star ? 'red' : 'darkgray' }"></b>
         </div>
-        <p @click="openPath(obj)">openPath</p>
         <label>{{ obj.title }}</label>
+        <p @click="openPath(obj)">打开路径</p>
         <span>{{ obj.file }}</span>
         <i>{{ obj.allSize || 0 }}MB</i>
         <span v-date="obj.date"></span>
@@ -200,7 +200,7 @@ export default {
     },
     openPath(obj) {
       console.log('obj: ', obj);
-      location.href = location.origin + obj.newBasePath
+      window.open(location.origin + obj.newBasePath, '_blank');
     },
     sort(key) {
       if (key) {
@@ -326,8 +326,11 @@ export default {
       position: relative;
       padding-top: 100%;
       width: 100%;
+      cursor: pointer;
       background-color: beige;
-      & .visits,.video-duration {
+
+      & .visits,
+      .video-duration {
         padding: 0;
         font-size: 10px;
         z-index: 10;
@@ -337,6 +340,7 @@ export default {
         // background: rgba(0, 0, 0, .5);
         text-shadow: 1px 1px 0px black;
         color: white;
+
         i {
           padding: 0;
         }
@@ -353,6 +357,18 @@ export default {
         // bottom: 3px;
         right: 3px;
         left: unset;
+      }
+
+      .type-icon {
+        padding: 0;
+        font-size: 24px;
+        z-index: 10;
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        // background: rgba(0, 0, 0, .5);
+        text-shadow: 1px 1px 0px black;
+        color: white;
       }
     }
 
@@ -385,13 +401,13 @@ export default {
       color: red;
     }
 
-    i {
-      padding-top: 12px;
-    }
+    // i {
+    //   padding-top: 12px;
+    // }
 
     .stars {
       box-sizing: border-box;
-      padding: 20px;
+      padding: 10px;
       width: 100%;
       display: flex;
       align-items: center;
@@ -427,4 +443,5 @@ export default {
   .home-list>div {
     width: calc(100%/3);
   }
-}</style>
+}
+</style>
