@@ -22,8 +22,10 @@
           :type="key == 'videoDuration' ? 'primary' : ''" @click="sort('videoDuration')">时长</el-button>
       </div>
       <div class="button-list">
-        <el-button size="mini" plain :type="type == 'video' ? 'primary' : ''" @click="changeType('video')">视频</el-button>
-        <el-button size="mini" plain :type="type == 'other' ? 'primary' : ''" @click="changeType('other')">其他</el-button>
+        <el-button size="mini" plain :type="type == 'video' ? 'primary' : ''"
+          @click="changeType('video')">视频</el-button>
+        <el-button size="mini" plain :type="type == 'other' ? 'primary' : ''"
+          @click="changeType('other')">其他</el-button>
         <el-button size="mini" plain :type="type == 'all' ? 'primary' : ''" @click="changeType('all')">全部</el-button>
       </div>
       <!-- search:<input type="text" v-model="filterVal">{{ showList.length }} -->
@@ -252,10 +254,20 @@ export default {
           return obj.type == this.type
         }
       }
+      let isDesc = (obj) => {
+        let ls = [].concat(obj?.videoActs, obj?.videoTags)
+        if (ls.join('').indexOf(n) != -1) {
+          console.log('ls: ', ls);
+          return true
+
+        } else {
+          return false
+        }
+      }
       this.showList = this.list.filter(obj => {
         if (!n) { return isType(obj) }
         let reg = new RegExp(n, 'i');
-        return (reg.test(obj.title) || reg.test(obj.file)) && isType(obj)
+        return (reg.test(obj.title) || reg.test(obj.file)||isDesc(obj)) && isType(obj)
       })
       this.sort()
     },
@@ -293,16 +305,17 @@ export default {
   justify-content: left;
   padding-bottom: 10px;
 
-
+  .el-button {
+    flex: 1;
+    padding: 5px 0 !important;
+  }
 }
 
-.el-button {
-  flex: 1;
-  padding: 5px 0 !important;
-}
+
 
 .button-list /deep/ .el-button {
   flex: 1;
+  padding: 5px 0 !important;
 }
 
 .home-list {

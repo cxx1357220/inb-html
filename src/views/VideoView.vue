@@ -1,6 +1,8 @@
 <template>
-    <div class="video">
-        <video ref="videoPlay" :src="obj.newPath" class="video-js " controls>
+    <div class="video" @touchstart="touchstart"
+            @touchmove="touchmove" 
+            @touchend="touchend">
+        <video ref="videoPlay" :src="obj.newPath" class="video-js " controls  >
             <track kind="chapter" default label="vtt" :src="obj.vtt" />
         </video>
     </div>
@@ -14,7 +16,11 @@ export default {
     name: 'videoP',
     data() {
         return {
-            obj: {}
+            obj: {},
+            startPos: {},
+            rate: 1,
+            player:{}
+
         }
     },
     created() {
@@ -26,7 +32,7 @@ export default {
         this.obj.vtt = l.join('.') + '.vtt'
     },
     mounted() {
-        videojs(this.$refs.videoPlay, {
+        this.player = videojs(this.$refs.videoPlay, {
             controls: true,
             sources: [
                 {
@@ -52,6 +58,29 @@ export default {
         })
     },
     methods: {
+        touchstart(event) {
+            // event.preventDefault();//阻止其他事件
+            var touch = event.targetTouches[0];     //touches数组对象获得屏幕上所有的touch，取第一个touch
+            this.rate = this.player.duration() / window.screen.width
+            console.log('this.rate: ', this.rate,this.$refs.videoPlay.duration,window.screen.width,this.player.duration());
+            this.startPos = { x: touch.pageX, y: touch.pageY };    //取第一个touch的坐标值
+        },
+        touchmove(event) {
+            if (event.targetTouches.length > 1 || event.scale && event.scale !== 1) return;
+            var touch = event.targetTouches[0];
+            let endPos = { x: touch.pageX - this.startPos.x, y: touch.pageY - this.startPos.y };
+            this.startPos = { x: touch.pageX, y: touch.pageY };
+            console.log('this.endPos: ', endPos);
+            let isScrolling = Math.abs(endPos.x) < Math.abs(endPos.y) ? 1 : 0;    //isScrolling为1时，表示纵向滑动，0为横向滑动
+            if (isScrolling === 0) {
+                event.preventDefault();      //阻止触摸事件的默认行为，即阻止滚屏
+                this.player.currentTime(this.player.currentTime() + endPos.x * this.rate)
+            }
+        },
+        touchend(event) {
+            console.log('touchend: ');
+            // event.preventDefault();//阻止其他事件
+        },
     }
 
 }
@@ -61,18 +90,21 @@ export default {
     overflow: hidden;
     width: 100vw;
     height: 100vh;
+    height: 100dvh;
     display: flex;
     justify-content: center;
     align-items: center;
 
     & /deep/ .video-js {
-        padding-top: 100vh !important;
+        // padding-top: 100vh !important;
+        padding-top: 100dvh !important;
     }
 }
 
 video {
     width: 100vw;
     height: 100vh !important;
+    height: 100dvh !important;
     overflow: hidden;
 }
 </style>
