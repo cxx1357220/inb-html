@@ -3,7 +3,7 @@
             @touchmove="touchmove" 
             @touchend="touchend">
         <video ref="videoPlay" :src="obj.newPath" class="video-js " controls  >
-            <track kind="chapter" default label="vtt" :src="obj.vtt" />
+            <track kind="subtitles" default label="vtt" :src="obj.vtt" />
         </video>
     </div>
 </template>
